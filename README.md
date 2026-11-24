@@ -8,7 +8,7 @@ An explainable **Case-Based Reasoning (CBR)** classifier combined with a **Retri
 ![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=flat&logo=streamlit&logoColor=white)
 ![RAG](https://img.shields.io/badge/RAG-Retrieval--Augmented%20Generation-8957E5?style=flat)
 
-> 👥 **Group project** with [Adam Fatnassi](https://github.com/AdamFatnassi) and [Talha Salek](https://github.com/TheTalhaCodes) — Université Paris Dauphine-PSL
+> 👥 **Group project** — Université Paris Dauphine-PSL
 > **My contribution:** the full **RAG pipeline** — embedding-based retrieval of similar clients, prompt augmentation, LLM generation via the Groq API, and its integration into the app.
 
 ---
