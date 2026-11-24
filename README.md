@@ -9,6 +9,7 @@ An explainable **Case-Based Reasoning (CBR)** classifier combined with a **Retri
 ![RAG](https://img.shields.io/badge/RAG-Retrieval--Augmented%20Generation-8957E5?style=flat)
 
 > 👥 **Group project** — Université Paris Dauphine-PSL
+
 > **My contribution:** the full **RAG pipeline** — embedding-based retrieval of similar clients, prompt augmentation, LLM generation via the Groq API, and its integration into the app.
 
 ---
