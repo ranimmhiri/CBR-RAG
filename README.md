@@ -1,38 +1,69 @@
-# Bank Marketing: Case-Based Reasoning & RAG
+# 🏦 Bank Marketing — Case-Based Reasoning & RAG
 
-A Bank Marketing project combining an explainable Case-Based Reasoning (CBR) classifier with a Retrieval-Augmented Generation (RAG) pipeline. 
+An explainable **Case-Based Reasoning (CBR)** classifier combined with a **Retrieval-Augmented Generation (RAG)** pipeline: the system predicts whether a client will subscribe to a term deposit, then uses an LLM to **explain the prediction in natural language** from the most similar past clients.
 
-The project is divided in 2 parts ; 
+![Python](https://img.shields.io/badge/Python-3776AB?style=flat&logo=python&logoColor=white)
+![scikit-learn](https://img.shields.io/badge/scikit--learn-F7931E?style=flat&logo=scikitlearn&logoColor=white)
+![Groq](https://img.shields.io/badge/LLM-Groq%20API-F55036?style=flat)
+![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=flat&logo=streamlit&logoColor=white)
+![RAG](https://img.shields.io/badge/RAG-Retrieval--Augmented%20Generation-8957E5?style=flat)
 
-### Part 1 : Experiments : 
-**Experiment 1**: 
+> 👥 **Group project** with [Adam Fatnassi](https://github.com/AdamFatnassi) and [Talha Salek](https://github.com/TheTalhaCodes) — Université Paris Dauphine-PSL
+> **My contribution:** the full **RAG pipeline** — embedding-based retrieval of similar clients, prompt augmentation, LLM generation via the Groq API, and its integration into the app.
 
-A comparaison with different knn models with different decision threshhold(voting versus balanced) and the CBR(Retrieve & Reuse) using the balanced accuracy as a metric (unbalanced dataset with ~88% saying no versus ~11% saying yes).
+---
 
-**Experiment 2** : 
+## 🎯 Overview
 
-A comparaison with four complete cycle of CBR and KNN.
+| | |
+|---|---|
+| **Task** | Binary classification — will the client subscribe? (yes / no) |
+| **Dataset** | [UCI Bank Marketing](https://archive.ics.uci.edu/dataset/222/bank+marketing) (`bank-additional-full.csv`) |
+| **Challenge** | Strong class imbalance: ~88% "no" vs ~11% "yes" |
+| **Metric** | Balanced accuracy |
+| **Case base** | ~30,000 past clients |
 
-### Part 2 : A dedicated platform using CBR & RAG together to predict and explain things 
+The project has two parts:
 
-A CBR with case-base of around 30k clients to answer , with the option of adding/attributing reliability for predictions when revise and retaining results.
+### Part 1 — Experiments
+- **Experiment 1:** comparison of several k-NN models with different decision rules (majority voting vs. balanced) against CBR (*Retrieve & Reuse*), evaluated with balanced accuracy.
+- **Experiment 2:** comparison of four complete CBR cycles against k-NN.
 
+### Part 2 — Prediction & explanation platform
+- A CBR engine over a case base of ~30k clients that predicts new cases.
+- Full CBR cycle: predictions can be **revised** and **retained**, with a reliability score attached to each retained case.
+- A web interface that displays the results and their interpretations.
 
-The website/interface showcases differents results/ interpretations.
+---
 
-## Architecture: How RAG works in this project
+## 🧠 Architecture — how RAG works here
 
-This project implements a RAG (Retrieval-Augmented Generation) pipeline:
+```
+New client ──► [1] Retrieval ──► similar past clients
+                                        │
+                                        ▼
+                               [2] Augmentation ──► structured prompt
+                                                          │
+                                                          ▼
+                                                  [3] Generation (LLM)
+                                                          │
+                                                          ▼
+                                       Natural-language explanation of the prediction
+```
 
-1. **Retrieval (Team):** `src/embedding_retrieval.py` finds the most similar past clients using embeddings.
-2. **Augmented (Team):** `src/augmentation.py` takes the retrieved cases and formats them into a structured prompt (`SYSTEM_PROMPT` + `user_prompt`).
-3. **Generation (This PR):** `src/rag_generator.py` takes the prompt built by the Augmentation module and sends it to an LLM (via Groq API) to generate a natural language explanation. 
+| Step | Module | Role |
+|---|---|---|
+| **1. Retrieval** | `src/embedding_retrieval.py` | Finds the most similar past clients using embeddings |
+| **2. Augmentation** | `src/augmentation.py` | Formats the retrieved cases into a structured prompt (`SYSTEM_PROMPT` + `user_prompt`) |
+| **3. Generation** | `src/rag_generator.py` | Sends the prompt to an LLM via the Groq API and returns an explanation |
 
-The generation is integrated directly into the Streamlit app (`src/app.py`) via a dedicated button in the prediction tab.
+The generation step is integrated into the app through a dedicated **"Generate explanations with AI"** button in the prediction tab.
 
-## Setup
+---
 
-Use Python 3.9 or newer. From the project root, in PowerShell:
+## ⚙️ Setup
+
+Python 3.9 or newer. From the project root (PowerShell):
 
 ```powershell
 py -m venv .venv
@@ -40,61 +71,63 @@ py -m venv .venv
 pip install -r requirements.txt
 ```
 
-The raw dataset should be at `data/raw/bank-additional-full.csv`.
+Place the dataset at `data/raw/bank-additional-full.csv`.
 
-## API Configuration (For RAG Generation)
-To use the LLM generation, you need a free API key from Groq.
+### LLM API key (for RAG generation)
 
-1. Duplicate the `.env.example` file and rename it to `.env`.
+1. Get a free API key from [Groq](https://console.groq.com/).
+2. Duplicate `.env.example`, rename it to `.env`, and add your key:
 
-2. Add your key inside:
-
-```powershell
+```
 GROQ_API_KEY=gsk_your_api_key_here
 ```
-(Note: If no key is provided, the RAG module will gracefully fall back to a simulation mode, so the app won't crash).
 
-## How to run the project
-Follow these steps in order to make the whole pipeline work:
+> If no key is provided, the RAG module falls back to a **simulation mode**, so the app still runs.
 
-1. Prepare the data:
+---
 
-```powershell
+## 🚀 Run the pipeline
+
+```bash
+# 1. Prepare the data
 python src/preprocessing.py
-```
-2. Run the retrieval and experiments (needed to generate the neighbor files and results):
 
-```powershell
+# 2. Run the experiments and the retrieval (generates neighbor files and results)
 python src/experiments.py --quick
 python src/embedding_retrieval.py
-```
-3. Launch servec & interface:
 
-```powershell
+# 3. Launch the server
 python web/rag_server.py
-run the index.html (go live)
 ```
-4. Use the app:
 
-- Go to the `Predict a client` tab and click `Retrieve similar clients and predict`.
+Then open `web/index.html` (e.g. with VS Code *Live Server*).
 
-- Once the CBR prediction is displayed, click the new button **Generate explications with AI** to see the LLM explanation.
+**In the app:**
+1. Go to the **Predict a client** tab and click **Retrieve similar clients and predict**.
+2. Once the CBR prediction is displayed, click **Generate explanations with AI** to get the LLM explanation.
 
-## Project layout
-- `src/` — Core source code.
+---
 
-- `embedding_retrieval.py` — Retrieval using embeddings (Part 1).
+## 📁 Project structure
 
-- `augmentation.py` — Prompt construction (Part 2).
-
-- `rag_generator.py` — LLM Generation using Groq API (Part 3).
-
-- `\web` — Interface for the complete results.
-
-- `cbr.py, baseline_knn.py, experiments.py` — CBR logic and evaluation.
-
-- `data/raw/` — Source dataset.
-
-- `data/processed/` — Generated splits and model input arrays.
-
-- `results/` — Experiment outputs.
+```
+CBR-RAG/
+├── src/
+│   ├── preprocessing.py         # data preparation
+│   ├── cbr.py                   # CBR logic (retrieve, reuse, revise, retain)
+│   ├── baseline_knn.py          # k-NN baselines
+│   ├── experiments.py           # evaluation & comparisons
+│   ├── embedding_retrieval.py   # [1] retrieval with embeddings
+│   ├── augmentation.py          # [2] prompt construction
+│   ├── rag_generator.py         # [3] LLM generation (Groq API)
+│   └── app.py                   # app integration
+├── web/                         # web interface & RAG server
+├── data/
+│   ├── raw/                     # source dataset
+│   └── processed/               # generated splits & model inputs
+├── results/                     # experiment outputs
+├── notebooks/
+├── tests/
+├── requirements.txt
+└── .env.example
+```
